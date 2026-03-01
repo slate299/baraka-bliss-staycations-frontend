@@ -1,0 +1,209 @@
+/* src/styles/index.css */
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  body {
+    @apply bg-gray-50 text-gray-900 font-sans;
+    margin: 0;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+}
+
+@layer components {
+  .card-hover {
+    @apply transition-all duration-200 hover:-translate-y-1 hover:shadow-lg hover:shadow-gray-200/50;
+  }
+
+  /* Restore original button colors */
+  .btn-primary {
+    @apply bg-client-rose text-white px-4 py-2 rounded-lg hover:bg-client-rose/90 transition-colors;
+  }
+
+  .btn-secondary {
+    @apply bg-client-green text-white px-4 py-2 rounded-lg hover:bg-client-green/90 transition-colors;
+  }
+
+  .btn-outline {
+    @apply border border-client-rose/30 text-client-rose px-4 py-2 rounded-lg hover:bg-client-rose/5 transition-colors;
+  }
+}
+
+/* =========================================== */
+/* CUSTOM ANIMATIONS */
+/* =========================================== */
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+@keyframes slideIn {
+  from {
+    transform: translateX(-10px);
+    opacity: 0;
+  }
+  to {
+    transform: translateX(0);
+    opacity: 1;
+  }
+}
+
+.animate-slideIn {
+  animation: slideIn 0.3s ease-out forwards;
+}
+
+/* Restore green pulse */
+@keyframes pulse-green {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(74, 124, 89, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 0 10px rgba(74, 124, 89, 0);
+  }
+}
+
+.animate-pulse-green {
+  animation: pulse-green 2s infinite;
+}
+
+/* Custom scrollbar - keep gray */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #9ca3af;
+  border-radius: 4px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #6b7280;
+}
+
+/* Smooth scrolling */
+html {
+  scroll-behavior: smooth;
+}
+
+/* =========================================== */
+/* KEYBOARD NAVIGATION FOCUS STYLES */
+/* =========================================== */
+
+/* Focus styles for keyboard navigation */
+*:focus-visible {
+  outline: 2px solid #e9afaf; /* client-rose */
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* Remove focus outline for mouse users, keep for keyboard */
+*:focus:not(:focus-visible) {
+  outline: none;
+}
+
+/* Ensure buttons and interactive elements have visible focus */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible,
+[role="button"]:focus-visible {
+  outline: 2px solid #e9afaf;
+  outline-offset: 2px;
+}
+
+/* =========================================== */
+/* REDUCED MOTION PREFERENCES */
+/* =========================================== */
+
+/* Respect user's motion preferences */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  /* Disable hover animations */
+  .group-hover\:scale-105:hover,
+  .group-hover\:translate-x-0:hover,
+  .hover\:scale-105:hover,
+  .hover\:-translate-y-1:hover {
+    transform: none !important;
+  }
+
+  /* Disable pulse animations */
+  .animate-pulse,
+  .animate-pulse-green,
+  .animate-pulse-slow {
+    animation: none !important;
+  }
+
+  /* Disable fade/slide animations */
+  .animate-fadeIn,
+  .animate-slideIn,
+  .animate-scaleIn {
+    animation: none !important;
+    opacity: 1 !important;
+    transform: none !important;
+  }
+
+  /* Disable shimmer effect */
+  .animate-shimmer {
+    animation: none !important;
+    background: #f0f0f0 !important;
+  }
+
+  /* Disable card hover lift */
+  .group-hover:-translate-y-1 {
+    transform: none !important;
+  }
+
+  /* Disable scale on hover */
+  .hover\:scale-105,
+  .hover\:scale-110,
+  .group-hover\:scale-105,
+  .group-hover\:scale-110 {
+    transform: scale(1) !important;
+  }
+
+  /* Keep focus styles for accessibility */
+  *:focus-visible {
+    transition: none !important;
+  }
+}
+
+/* No image placeholder */
+.no-image-placeholder {
+  @apply w-full h-full flex flex-col items-center justify-center bg-client-bg;
+}
+
+.no-image-icon {
+  @apply w-12 h-12 text-client-text-secondary opacity-30 mb-2;
+}
+
+.no-image-text {
+  @apply text-sm text-client-text-secondary;
+}
