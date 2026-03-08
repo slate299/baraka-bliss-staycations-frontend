@@ -5,17 +5,34 @@ import { useState } from "react";
 const MediaGallery = ({ mediaFiles = [], onRemove, isLoading = false }) => {
   const [videoErrors, setVideoErrors] = useState({});
 
-  // Helper to construct full URL
-  const getFullMediaUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith("http")) return path;
-    // Replace backslashes with forward slashes
-    const cleanPath = path.replace(/\\/g, "/");
-    return `${process.env.REACT_APP_API_BASE_URL}/${cleanPath}`;
+  // UPDATED: Helper to safely get URL from different formats
+  const getMediaUrl = (media) => {
+    if (!media) return null;
+
+    // If it's an object with url property (Cloudinary format)
+    if (typeof media === "object" && media.url) {
+      return media.url;
+    }
+
+    // If it's a string
+    if (typeof media === "string") {
+      // If it's already a full URL
+      if (media.startsWith("http")) {
+        return media;
+      }
+      // If it's a local path
+      const cleanPath = media.replace(/\\/g, "/");
+      return `${process.env.REACT_APP_API_BASE_URL}/${cleanPath}`;
+    }
+
+    return null;
   };
 
-  // Helper to determine if file is video
-  const isVideo = (path) => {
+  // UPDATED: Helper to determine if file is video
+  const isVideo = (media) => {
+    const url = getMediaUrl(media);
+    if (!url) return false;
+
     const videoExtensions = [
       ".mp4",
       ".mov",
@@ -25,12 +42,19 @@ const MediaGallery = ({ mediaFiles = [], onRemove, isLoading = false }) => {
       ".m4v",
       ".3gp",
     ];
-    return videoExtensions.some((ext) => path.toLowerCase().includes(ext));
+    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
   };
 
   // Handle video error
   const handleVideoError = (index) => {
     setVideoErrors((prev) => ({ ...prev, [index]: true }));
+  };
+
+  // Extract filename for display
+  const getFileName = (media) => {
+    const url = getMediaUrl(media);
+    if (!url) return "Media file";
+    return url.split("/").pop() || "Media file";
   };
 
   if (!mediaFiles || mediaFiles.length === 0) {
@@ -45,13 +69,9 @@ const MediaGallery = ({ mediaFiles = [], onRemove, isLoading = false }) => {
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
       {mediaFiles.map((file, index) => {
-        // Get the file path (it's a string from your backend)
-        const filePath = typeof file === "string" ? file : file.url;
-        // Construct the full URL
-        const fileUrl = getFullMediaUrl(filePath);
-        // Extract filename for tooltip
-        const fileName = filePath.split(/[\\/]/).pop() || "Media file";
-        const isVideoFile = isVideo(filePath);
+        const fileUrl = getMediaUrl(file);
+        const fileName = getFileName(file);
+        const isVideoFile = isVideo(file);
         const hasVideoError = videoErrors[index];
 
         return (
@@ -103,7 +123,7 @@ const MediaGallery = ({ mediaFiles = [], onRemove, isLoading = false }) => {
             {onRemove && (
               <button
                 type="button"
-                onClick={() => onRemove(index, filePath)}
+                onClick={() => onRemove(index, file)}
                 disabled={isLoading}
                 className={`absolute top-2 right-2 text-white p-2 rounded-full transition-all ${
                   isLoading

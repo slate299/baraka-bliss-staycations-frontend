@@ -57,25 +57,44 @@ const ApartmentPreviewModal = ({ apartment, onClose }) => {
     isAvailable,
   } = apartment;
 
-  // Get full media URL
-  const getFullMediaUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith("http")) return path;
-    const cleanPath = path.replace(/\\/g, "/");
-    return `${process.env.REACT_APP_API_BASE_URL || "http://localhost:5000"}/${cleanPath}`;
+  // UPDATED: Helper to safely get URL from different formats
+  const getMediaUrl = (media) => {
+    if (!media) return null;
+
+    // If it's an object with url property (Cloudinary format)
+    if (typeof media === "object" && media.url) {
+      return media.url;
+    }
+
+    // If it's a string
+    if (typeof media === "string") {
+      // If it's already a full URL
+      if (media.startsWith("http")) {
+        return media;
+      }
+      // If it's a local path
+      const cleanPath = media.replace(/\\/g, "/");
+      return `${process.env.REACT_APP_API_BASE_URL || "http://localhost:5000"}/${cleanPath}`;
+    }
+
+    return null;
   };
 
-  // Check if media is video
-  const isVideo = (path) => {
+  // UPDATED: Check if media is video
+  const isVideo = (media) => {
+    const url = getMediaUrl(media);
+    if (!url) return false;
+
     const videoExtensions = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
-    return videoExtensions.some((ext) => path?.toLowerCase().includes(ext));
+    return videoExtensions.some((ext) => url.toLowerCase().includes(ext));
   };
 
+  // Get current media URL and type
   const currentMedia = mediaFiles[currentMediaIndex];
-  const currentMediaUrl = currentMedia ? getFullMediaUrl(currentMedia) : null;
+  const currentMediaUrl = currentMedia ? getMediaUrl(currentMedia) : null;
   const isCurrentVideo = currentMedia ? isVideo(currentMedia) : false;
 
-  // Count media types
+  // UPDATED: Count media types
   const mediaCount = {
     images: mediaFiles.filter((m) => !isVideo(m)).length,
     videos: mediaFiles.filter((m) => isVideo(m)).length,

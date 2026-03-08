@@ -27,6 +27,26 @@ const HomePage = () => {
   const { featured: featuredApartments, loading: featuredLoading } =
     useFeaturedApartments(4);
 
+  // Add this helper function here 👇
+  const getMediaUrl = (media) => {
+    if (!media)
+      return "https://placehold.co/400x300/3b82f6/white?text=No+Image";
+
+    if (typeof media === "object" && media.url) {
+      return media.url; // Cloudinary URL
+    }
+
+    if (typeof media === "string") {
+      if (media.startsWith("http")) {
+        return media; // Already full URL
+      }
+      const cleanPath = media.replace(/\\/g, "/");
+      return `${process.env.REACT_APP_API_BASE_URL}/${cleanPath}`; // Local path with API base
+    }
+
+    return "https://placehold.co/400x300/3b82f6/white?text=No+Image";
+  };
+
   // Animation variants
   const fadeInUp = {
     initial: { opacity: 0, y: 30 },
@@ -216,14 +236,7 @@ const HomePage = () => {
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
                 At Baraka Bliss, we believe every stay should be a celebration
-                of comfort, luxury, and Kenyan hospitality.{" "}
-                <span className="font-semibold text-client-rose">"Baraka"</span>{" "}
-                means{" "}
-                <span className="font-semibold text-client-rose">
-                  "blessings"
-                </span>{" "}
-                in Swahili, and we're dedicated to blessing our guests with
-                unforgettable experiences.
+                of comfort, luxury, and Kenyan hospitality.
               </motion.p>
 
               <motion.p
@@ -327,15 +340,15 @@ const HomePage = () => {
                     <div className="h-48 overflow-hidden bg-client-bg">
                       {apt.mediaFiles?.length > 0 ? (
                         <img
-                          src={`http://localhost:5000/${apt.mediaFiles[0]}`}
+                          src={getMediaUrl(apt.mediaFiles[0])}
                           alt={apt.name}
                           className="w-full h-full object-cover
-                 hover:scale-110 transition-transform duration-500"
+               hover:scale-110 transition-transform duration-500"
                           loading="lazy"
                           onError={(e) => {
                             e.target.onerror = null;
                             e.target.src =
-                              "https://via.placeholder.com/400x300?text=No+Image";
+                              "https://placehold.co/400x300/3b82f6/white?text=No+Image";
                           }}
                         />
                       ) : (

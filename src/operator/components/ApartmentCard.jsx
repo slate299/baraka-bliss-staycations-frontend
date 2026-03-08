@@ -54,33 +54,48 @@ const ApartmentCard = ({ apartment, onToggle, onDelete, inquiryCount = 0 }) => {
     navigate(`/operator/edit/${_id}`);
   };
 
-  // Helper function to determine media type from file path
-  const getMediaType = (mediaPath) => {
-    if (!mediaPath) return null;
+  // UPDATED: Helper to safely get URL from different formats
+  const getMediaUrl = (media) => {
+    if (!media) return null;
+
+    // If it's an object with url property (Cloudinary format)
+    if (typeof media === "object" && media.url) {
+      return media.url;
+    }
+
+    // If it's a string
+    if (typeof media === "string") {
+      // If it's already a full URL
+      if (media.startsWith("http")) {
+        return media;
+      }
+      // If it's a local path
+      const cleanPath = media.replace(/\\/g, "/");
+      return `${process.env.REACT_APP_API_BASE_URL}/${cleanPath}`;
+    }
+
+    return null;
+  };
+
+  // UPDATED: Helper to determine media type from file path
+  const getMediaType = (media) => {
+    const url = getMediaUrl(media);
+    if (!url) return null;
 
     const videoExtensions = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
     const isVideo = videoExtensions.some((ext) =>
-      mediaPath.toLowerCase().includes(ext),
+      url.toLowerCase().includes(ext),
     );
 
     return isVideo ? "video" : "image";
   };
 
-  // Get first media item and construct full URL
+  // Get first media item
   const firstMedia = mediaFiles && mediaFiles.length > 0 ? mediaFiles[0] : null;
 
-  // Construct full URL using API base URL
-  const getFullMediaUrl = (path) => {
-    if (!path) return null;
-    if (path.startsWith("http")) return path;
-    // Replace backslashes with forward slashes and construct full URL
-    const cleanPath = path.replace(/\\/g, "/");
-    return `${process.env.REACT_APP_API_BASE_URL}/${cleanPath}`;
-  };
-
-  const mediaUrl = firstMedia ? getFullMediaUrl(firstMedia) : null;
+  // Get URL and type using new helpers
+  const mediaUrl = firstMedia ? getMediaUrl(firstMedia) : null;
   const mediaType = firstMedia ? getMediaType(firstMedia) : null;
-
   // Handle image load error
   const handleImageError = () => {
     setImageError(true);
@@ -193,12 +208,15 @@ const ApartmentCard = ({ apartment, onToggle, onDelete, inquiryCount = 0 }) => {
             onError={(e) => {
               console.log("Video failed to load:", mediaUrl);
               e.target.style.display = "none";
-              e.target.parentElement.innerHTML = `
-            <div class="w-full h-full flex flex-col items-center justify-center bg-[#2C2C2C]">
-              <FaVideo class="text-3xl text-text-secondary mb-2 opacity-30" />
-              <span class="text-xs text-text-secondary">Video unavailable</span>
-            </div>
-          `;
+              // Create fallback element properly instead of using innerHTML
+              const fallbackDiv = document.createElement("div");
+              fallbackDiv.className =
+                "w-full h-full flex flex-col items-center justify-center bg-[#2C2C2C]";
+              fallbackDiv.innerHTML = `
+    <svg class="text-3xl text-text-secondary mb-2 opacity-30" stroke="currentColor" fill="currentColor" stroke-width="0" viewBox="0 0 576 512" height="1em" width="1em" xmlns="http://www.w3.org/2000/svg"><path d="M336.2 64H47.8C21.4 64 0 85.4 0 111.8v288.4C0 426.6 21.4 448 47.8 448h288.4c26.4 0 47.8-21.4 47.8-47.8V111.8c0-26.4-21.4-47.8-47.8-47.8zm189.4 37.7L416 177.3v157.4l109.6 75.5c21.2 14.6 50.4-.3 50.4-25.8V127.5c0-25.4-29.1-40.4-50.4-25.8z"></path></svg>
+    <span class="text-xs text-text-secondary">Video unavailable</span>
+  `;
+              e.target.parentElement.appendChild(fallbackDiv);
             }}
           />
           <div className="absolute top-2 left-2 bg-black bg-opacity-60 p-1.5 rounded-full">
@@ -225,15 +243,19 @@ const ApartmentCard = ({ apartment, onToggle, onDelete, inquiryCount = 0 }) => {
     );
   };
 
-  // Count different media types
+  // UPDATED: Count different media types
   const mediaCount = {
     images: mediaFiles.filter((m) => {
+      const url = getMediaUrl(m);
+      if (!url) return false;
       const videoExts = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
-      return !videoExts.some((ext) => m.toLowerCase().includes(ext));
+      return !videoExts.some((ext) => url.toLowerCase().includes(ext));
     }).length,
     videos: mediaFiles.filter((m) => {
+      const url = getMediaUrl(m);
+      if (!url) return false;
       const videoExts = [".mp4", ".mov", ".avi", ".webm", ".mkv"];
-      return videoExts.some((ext) => m.toLowerCase().includes(ext));
+      return videoExts.some((ext) => url.toLowerCase().includes(ext));
     }).length,
   };
 
