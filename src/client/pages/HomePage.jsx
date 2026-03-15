@@ -166,7 +166,7 @@ const HomePage = () => {
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.4, duration: 0.6 }}
             >
-              Baraka Bliss
+              Baraka Bliss Staycations
             </motion.h1>
 
             <motion.p
@@ -217,7 +217,7 @@ const HomePage = () => {
                 viewport={{ once: true }}
                 transition={{ delay: 0.2, duration: 0.6 }}
               >
-                Welcome to Baraka Bliss
+                Welcome to Baraka Bliss Staycations
               </motion.h2>
 
               <motion.div
@@ -235,8 +235,8 @@ const HomePage = () => {
                 viewport={{ once: true }}
                 transition={{ delay: 0.4, duration: 0.6 }}
               >
-                At Baraka Bliss, we believe every stay should be a celebration
-                of comfort, luxury, and Kenyan hospitality.
+                At Baraka Bliss Staycations, we believe every stay should be a
+                celebration of comfort, luxury, and Kenyan hospitality.
               </motion.p>
 
               <motion.p
